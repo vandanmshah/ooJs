@@ -1,28 +1,39 @@
-var Student = Class({
-    firstName: null,
-    lastName: null,
-    percentage: null,
+var Person = Class({
+    name: '',
+    age: 0,
+    gender: '',
     displayDetails: function () {
-        console.log("Name of Student :- " + this.firstName + " " + this.lastName);
+        console.log('Name: ' + this.name + ', Age: ' + this.age);
+    }
+});
+var JohnObj = new Person({
+    name: 'John',
+    age: 20,
+    gender: 'Male'
+});
+var sophiaObj = new Person({
+    name: 'Sophia',
+    age: 22,
+    gender: 'Female'
+});
+JohnObj.displayDetails();
+sophiaObj.displayDetails();
+
+var Fruit = Class({
+    init: function (params) {
+        this.name = params.name;
+    },
+    name: '',
+    displayDetails() {
+        console.log('Fruit Name:- ', this.name);
     },
 });
-var Male = Student.extend({
-    firstName: "John",
-    lastName: "Doe",
-    percentage: 85,
-    displayDetails: function () {
-        this._super.apply(this, arguments);
-        console.log("He got " + this.percentage + "% in exam...")
-    },
+
+var mango = new Fruit([]);
+
+var apple = new Fruit({
+    name: 'Red Apple',
 });
-var Female = Student.extend({
-    firstName: "Julie",
-    lastName: "Richards",
-    percentage: 87,
-    displayDetails: function () {
-        this._super.apply(this, arguments);
-        console.log("She got " + this.percentage + "% in exam...")
-    },
-});
-Male.displayDetails();
-Female.displayDetails();
+
+mango.displayDetails();
+apple.displayDetails();

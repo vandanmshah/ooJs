@@ -1,79 +1,100 @@
-/**
- * TODOS :-
- *      1) Add the support to customise the behaviour of constructor
- */
-
-(function (global) {
-    var fnTest = /xyz/.test(function(){xyz();}) ? /\b_super\b/ : /.*/;
-    var _super;
+(function(global) {
     /**
-     * @private
-     * Helps to remove duplicate elements from two objects
-     * @param {object} object in which we store final result
-     * @param {object} object which we want to extend
-     * @returns final extended object result
+     * This function checks passed value is function type is or not
+     * @param {any} obj which you want to check
+     * @returns true if passed object is function type otherwise false
      */
-    function _extend (obj) {
-        var len = arguments.length;
-        if (obj == null || len < 2) { // arguments.length
-            return;
-        }
-        for (var i = 1; i < len; i++) {
-            var source = arguments[i];
-            for (key in source) {
-                if (obj[key] === void 0) {
-                    obj[key] = source [key];
+    var isFunction = function(obj) {
+        return obj && typeof obj === "function";
+    };
+    /**
+     * Used to seperate class variables and methods
+     * 
+     * @param {Object} obj 
+     * @returns {Object} Seperate object
+     */
+    var seperateProperties = function (obj) {
+        if (typeof obj === 'object') {
+            var seperatedPprops = {
+                methods: {},
+                properties: {},
+            };
+            var paramKeys = Object.keys(obj);
+            for (var index = 0; index < paramKeys.length; index++) {
+                if (isFunction(obj[paramKeys[index]])) {
+                    seperatedPprops.methods[paramKeys[index]] = obj[paramKeys[index]];
+                } else {
+                    seperatedPprops.properties[paramKeys[index]] = obj[paramKeys[index]];
                 }
             }
+            return seperatedPprops;
+        } else {
+            console.error('Class parameter should be Object');
         }
-        return obj;
-    }
-    var Class = function () {
-        // if callee of this function is already instance of class
-        // then set it to prototype to support inheritance
-        // used in extend method
-        if (this instanceof Class.constructor) {
-            _super = Class.constructor.prototype = this;
-        }
-        return new Class.constructor(arguments[0]);
-    }
-    /**
-     * starting point of class where it initialize member variables and member function
-     * which is passed tobe set in class
-     * @param {object} to initialize class with member variables and member function 
-     */
-    Class.constructor = function (params) {
-        // var _super = this.prototype;
-        for (i in params) {
-            this[i] = typeof params[i] == "function" &&
-            fnTest.test(params[i]) ? (function (name, fn) {
-                return function () {
-                    var tmp = _super;
-
-                    // Add a new ._super() method that is the same
-                    // method but on the super-class
-                    this._super = _super[name];
-
-                    // The method only need to be bound temporarily, so
-                    // we remove it when we're done executing
-                    var ret = fn.apply(this, arguments);
-                    this._super = tmp;
-
-                    return ret;
-                };
-            }) (i, params[i]) : params[i];
-        }
-    }
-    /**
-     * @public decelare public function for Class for utility
-     * this functions decelared here should not be decelared as
-     * member function in Class
-     */
-    Class.prototype = {
-        extend: function (params) {
-            return Class.call(this, params)
-        },
+        return;
     };
-    Class.constructor.prototype = Class.prototype;
+
+    /**
+     * Main function classRefrence called when user will decelare class using new keyword
+     * 
+     * Called init function which decelares all variables
+    */
+    function classRefrence() {
+        setClassVariables.call(this, this.classProperties);
+        init.apply(this, arguments);
+    }
+
+    /**
+     * Custom init which defines all function properties
+     * 
+     * @param {Object} obj 
+     */
+    var init = function () {
+        var objectArguments = arguments[0];
+        debugger
+        if (objectArguments && (typeof objectArguments === 'object')) {
+            var propertiesNames = Object.keys(objectArguments);
+            for (var index = 0; index < propertiesNames.length; index++) {
+                if (this.hasOwnProperty(propertiesNames[index])) {
+                    this[propertiesNames[index]] = objectArguments[propertiesNames[index]];                    
+                }
+            }
+        } else {
+            console.error('Class parameter should be Object');
+        }
+    };
+    var setClassVariables = function () {
+        var classVariables = arguments[0];
+        var variableNames = Object.keys(classVariables);
+        if (classVariables && variableNames.length) {
+            for (var index = 0; index < variableNames.length; index++) {
+                this[variableNames[index]] = classVariables[variableNames[index]];
+            }
+        }
+    };
+    function Class() {
+        var seperatedClassPprops = seperateProperties(arguments.length && arguments[0]);
+        if (seperatedClassPprops) {
+            seperatedClassPprops.methods.init = seperatedClassPprops.methods.init || init.bind(this, seperatedClassPprops.properties);
+            // setClassVariables.call(classRefrence, seperatedClassPprops.properties);
+            classRefrence.prototype = new Properties(seperatedClassPprops);
+        } else {
+            console.error('Wrong class arguments.');
+        }
+        return classRefrence;
+    }
+
+    function Properties() {
+        var objMethods = arguments[0]['methods'];
+        // Object.prototype.toString
+        var all_keys = Object.keys(objMethods);
+        for (var index = 0; index < all_keys.length; index++) {
+            if (objMethods && isFunction(objMethods[all_keys[index]])) {
+                this[all_keys[index]] = objMethods[all_keys[index]];
+            }
+        }
+        this['classProperties'] = arguments[0]['properties'];
+    }
+    Properties.prototype.extend = function() {};
     global.Class = Class;
-}) (window);
+})(window);
