@@ -51,7 +51,6 @@
      */
     var init = function () {
         var objectArguments = arguments[0];
-        debugger
         if (objectArguments && (typeof objectArguments === 'object')) {
             var propertiesNames = Object.keys(objectArguments);
             for (var index = 0; index < propertiesNames.length; index++) {
